@@ -197,5 +197,9 @@ public class Service   {
   @JsonProperty("landmark")
   private String landmark;
   
+
+  @JsonProperty("slaEndTime")
+  private Long slaEndTime = null;
+  
   }
 

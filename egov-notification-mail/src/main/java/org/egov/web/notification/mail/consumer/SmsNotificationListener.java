@@ -17,7 +17,10 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class SmsNotificationListener {
 
 	private UserRepository userRepository;
@@ -28,6 +31,9 @@ public class SmsNotificationListener {
 
 	@Value("${email.subject}")
 	private String subject;
+	
+	@Value("${email.message.delimiter}")
+	private String messageDelimiter ; 
 
 	@Autowired
 	public SmsNotificationListener(UserRepository userRepository, ApplicationConfiguration config,
@@ -39,11 +45,39 @@ public class SmsNotificationListener {
 
 	@KafkaListener(topics = "${kafka.topics.notification.sms.topic.name}")
 	public void process(final HashMap<String, Object> record) {
+		
+		if(record.get(Constants.SMS_REQ_SKIP_EMAIL_KEY_NAME)!= null && record.get(Constants.SMS_REQ_SKIP_EMAIL_KEY_NAME).toString().equalsIgnoreCase("true"))
+		{
+			log.info(" Skipping the sms request for email with message {} ",record.get(Constants.SMS_REQ_MSG_KEY_NAME).toString());
+			return;
+		}
+		
 		List<String> emails = userRepository.getEmailsByMobileNo(config.getStateTenantId(),
 				(String) record.get(Constants.SMS_REQ_MOBILE_NO_KEY_NAME));
+		
+		
+		
 		if(!CollectionUtils.isEmpty(emails))
-			emailService
-					.sendEmail(getEmailReq(getValideEmails(emails), (String) record.get(Constants.SMS_REQ_MSG_KEY_NAME)));
+		{
+			String message = record.get(Constants.SMS_REQ_MSG_KEY_NAME).toString() ;
+			String templateId = "" ;
+			
+			String[] splittedMessage = message.split(messageDelimiter);
+			if (splittedMessage != null) {
+				if (splittedMessage.length == 1) {
+					message = splittedMessage[0];
+					log.info(String.format(" TemplateId not found for the  message '%s'", message));
+				}
+				if (splittedMessage.length == 2) {
+					message = splittedMessage[0];
+					templateId = splittedMessage[1];
+					log.info(String.format("Email sent with message- '%s'  with template id %s", message, templateId));
+
+				}
+			}
+			
+			emailService.sendEmail(getEmailReq(getValideEmails(emails), message));
+		}
 
 	}
 

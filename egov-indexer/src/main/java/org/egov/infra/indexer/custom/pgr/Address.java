@@ -46,5 +46,9 @@ public class Address {
 	
 	@JsonProperty("auditDetails")
 	public AuditDetails auditDetails;
+	
+	
+	@JsonProperty("pinCode")
+	private String pinCode;
 
 }
