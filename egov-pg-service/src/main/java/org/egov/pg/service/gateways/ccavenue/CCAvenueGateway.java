@@ -45,6 +45,7 @@ public class CCAvenueGateway implements Gateway {
     private final String CANCEL_URL;
     private final String LANGUAGE;
     private final String ORIGINAL_RETURN_URL_KEY;
+    private final String BILLING_NAME;
 
     private final String MERCHANT_ID_KEY = "merchant_id";
     private final String ORDER_ID_KEY = "order_id";
@@ -56,6 +57,7 @@ public class CCAvenueGateway implements Gateway {
     private final String SUB_ACCOUNT_ID_KEY = "sub_account_id";
     private final String ACCESS_CODE_KEY = "access_code";
     private final String ENCREQUEST_KEY = "encRequest";
+    private final String BILLING_NAME_KEY = "billing_name";
 
     private RestTemplate restTemplate;
     private CCAvenueCryptUtil redirectCCavenueUtil;
@@ -78,6 +80,7 @@ public class CCAvenueGateway implements Gateway {
         GATEWAY_URL = environment.getRequiredProperty("ccavenue.gateway.url");
         GATEWAY_TRANSACTION_STATUS_URL = environment.getRequiredProperty("ccavenue.gateway.status.url");
         ORIGINAL_RETURN_URL_KEY = environment.getRequiredProperty("ccavenue.original.return.url.key");
+        BILLING_NAME = environment.getRequiredProperty("ccavenue.billing.name");
     }
 
     @Override
@@ -92,6 +95,7 @@ public class CCAvenueGateway implements Gateway {
         encRequestMap.put(CANCEL_URL_KEY, getReturnUrl(transaction.getCallbackUrl(), CANCEL_URL));
         encRequestMap.put(LANGUAGE_KEY, LANGUAGE);
         encRequestMap.put(SUB_ACCOUNT_ID_KEY, transaction.getTenantId().replace(".",""));
+        encRequestMap.put(BILLING_NAME_KEY, BILLING_NAME);
         StringBuilder encRequest = new StringBuilder("");
 
         encRequestMap.forEach((key, value) -> encRequest.append(key).append("=").append(value).append("&"));
