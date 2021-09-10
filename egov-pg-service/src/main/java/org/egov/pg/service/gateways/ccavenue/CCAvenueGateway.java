@@ -58,6 +58,7 @@ public class CCAvenueGateway implements Gateway {
     private final String ACCESS_CODE_KEY = "access_code";
     private final String ENCREQUEST_KEY = "encRequest";
     private final String BILLING_NAME_KEY = "billing_name";
+	private final String MERCHANT_PARAM1_KEY = "merchant_param1";	
 
     private RestTemplate restTemplate;
     private CCAvenueCryptUtil redirectCCavenueUtil;
@@ -94,7 +95,13 @@ public class CCAvenueGateway implements Gateway {
         encRequestMap.put(REDIRECT_URL_KEY, getReturnUrl(transaction.getCallbackUrl(), REDIRECT_URL));
         encRequestMap.put(CANCEL_URL_KEY, getReturnUrl(transaction.getCallbackUrl(), CANCEL_URL));
         encRequestMap.put(LANGUAGE_KEY, LANGUAGE);
-        encRequestMap.put(SUB_ACCOUNT_ID_KEY, transaction.getTenantId().replace(".",""));
+		String subAccountID = transaction.getTenantId().replace(".","");
+		if(subAccountID!=null && subAccountID.indexOf("developmentauthority")>-1)
+		{
+			subAccountID = subAccountID.substring(0,20);
+		}
+        encRequestMap.put(SUB_ACCOUNT_ID_KEY, subAccountID);
+		encRequestMap.put(MERCHANT_PARAM1_KEY, transaction.getConsumerCode());		
         encRequestMap.put(BILLING_NAME_KEY, BILLING_NAME);
         StringBuilder encRequest = new StringBuilder("");
 
@@ -183,7 +190,9 @@ public class CCAvenueGateway implements Gateway {
             decyJsonString = statusCCavenueUtil.decrypt(respMap.get("enc_response").replace("\r\n", ""));
             statusResponse = new ObjectMapper().readValue(decyJsonString,CCAvenueStatusResponse.class);
 
-            if (statusResponse.getOrderStatus().equalsIgnoreCase("Successful") || 
+			if (statusResponse.getOrderStatus() == null)
+				status = Transaction.TxnStatusEnum.FAILURE;
+            else if (statusResponse.getOrderStatus().equalsIgnoreCase("Successful") || 
                 statusResponse.getOrderStatus().equalsIgnoreCase("Shipped"))
                 status = Transaction.TxnStatusEnum.SUCCESS;
             else if (statusResponse.getOrderStatus().equalsIgnoreCase("Unsuccessful"))
