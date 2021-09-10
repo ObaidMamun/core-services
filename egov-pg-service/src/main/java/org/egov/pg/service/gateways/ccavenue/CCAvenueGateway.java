@@ -101,7 +101,7 @@ public class CCAvenueGateway implements Gateway {
 			subAccountID = subAccountID.substring(0,20);
 		}
         encRequestMap.put(SUB_ACCOUNT_ID_KEY, subAccountID);
-		encRequestMap.put(MERCHANT_PARAM1_KEY, transaction.getConsumerCode());		
+		encRequestMap.put(MERCHANT_PARAM1_KEY, transaction.getConsumerCode().substring(0,2));		
         encRequestMap.put(BILLING_NAME_KEY, BILLING_NAME);
         StringBuilder encRequest = new StringBuilder("");
 
