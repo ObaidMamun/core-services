@@ -220,9 +220,16 @@ public class WorkflowValidator {
 
                 if(processInstanceFromDb!=null){
                     if(!CollectionUtils.isEmpty(processInstanceFromDb.getAssignes())){
-                        List<String> assignes = processInstanceFromDb.getAssignes().stream().map(User::getUuid).collect(Collectors.toList());
+                    	List<String> assignes = new LinkedList<>();
 
-                        if(!assignes.contains(userUUID))
+                        for(User assignee : processInstanceFromDb.getAssignes()){
+
+                            if(assignee.getType().equalsIgnoreCase(CITIZEN_TYPE))
+                                assignes.add(assignee.getUuid());
+
+                        }
+
+                        if(!CollectionUtils.isEmpty(assignes) && !assignes.contains(userUUID))
                             errorMap.put("INVALID_USER","Citizen not authorized to perform action on application: "+processInstanceFromDb.getBusinessId());
                     }
                 }
