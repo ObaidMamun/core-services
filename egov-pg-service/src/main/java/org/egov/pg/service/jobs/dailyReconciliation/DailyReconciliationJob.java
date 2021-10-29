@@ -1,6 +1,9 @@
 package org.egov.pg.service.jobs.dailyReconciliation;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
 import org.egov.pg.config.AppProperties;
@@ -11,19 +14,18 @@ import org.egov.pg.service.TransactionService;
 import org.egov.pg.web.models.TransactionCriteria;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Daily Reconciliation of pending transactions
  */
 @Component
 @Slf4j
-public class DailyReconciliationJob implements Job {
+public class DailyReconciliationJob implements Job,  InitializingBean {
 
     private static final RequestInfo requestInfo;
 
@@ -42,6 +44,20 @@ public class DailyReconciliationJob implements Job {
     private TransactionService transactionService;
     @Autowired
     private TransactionRepository transactionRepository;
+    
+    /**
+	 * 
+	*/
+    @Override
+	public void afterPropertiesSet() throws Exception {
+
+    	User userInfo = User.builder()
+                .uuid(appProperties.getDailyReconciliationUserUuid())
+                .type(appProperties.getDailyReconciliationUserType())
+                .roles(Collections.emptyList()).id(0L).build();
+
+        requestInfo.setUserInfo(userInfo);
+	}
 
     /**
      * Fetch live status for all pending transactions
