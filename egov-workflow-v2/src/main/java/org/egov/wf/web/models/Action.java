@@ -65,9 +65,7 @@ public class Action   {
         private List<String> roles;
 
         private AuditDetails auditDetails;
-        
-        @JsonProperty("active")
-        private Boolean active;
+
 
         public Action addRolesItem(String rolesItem) {
             if (this.roles == null) {

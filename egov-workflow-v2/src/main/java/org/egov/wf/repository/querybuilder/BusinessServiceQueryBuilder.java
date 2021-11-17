@@ -23,10 +23,10 @@ public class BusinessServiceQueryBuilder {
              " st.lastModifiedBy as st_lastModifiedBy,"  +
              " ac.lastModifiedTime as ac_lastModifiedTime,ac.createdTime as ac_createdTime," +
              "ac.createdBy as ac_createdBy,ac.lastModifiedBy as ac_lastModifiedBy," +
-             "ac.uuid as ac_uuid,ac.tenantId as ac_tenantId,ac.active as ac_active"  +
+             "ac.uuid as ac_uuid,ac.tenantId as ac_tenantId"  +
              " FROM eg_wf_businessService_v2 bs " +
             INNER_JOIN + " eg_wf_state_v2 st ON st.businessServiceId = bs.uuid " +
-            LEFT_OUTER_JOIN  + " eg_wf_action_v2 ac ON ac.currentState = st.uuid AND ac.active=TRUE ";
+            LEFT_OUTER_JOIN  + " eg_wf_action_v2 ac ON ac.currentState = st.uuid WHERE ";
 
 
 
@@ -34,31 +34,31 @@ public class BusinessServiceQueryBuilder {
     public String getBusinessServices(BusinessServiceSearchCriteria criteria, List<Object> preparedStmtList){
         StringBuilder builder = new StringBuilder(BASE_QUERY);
 
-        String tenantId = criteria.getTenantId();
-        if (tenantId != null) {
-            addClauseIfRequired(preparedStmtList, builder);
-            builder.append(" bs.tenantId = ? ");
-            preparedStmtList.add(tenantId);
+        List<String> tenantIds = criteria.getTenantIds();
+        if (!CollectionUtils.isEmpty(tenantIds)) {
+
+            builder.append(" bs.tenantId IN (").append(createQuery(tenantIds)).append(")");
+            addToPreparedStatement(preparedStmtList, tenantIds);
         }
 
         List<String> businessServices = criteria.getBusinessServices();
         if (!CollectionUtils.isEmpty(businessServices)) {
-        	addClauseIfRequired(preparedStmtList, builder);
-            builder.append(" bs.businessService IN (").append(createQuery(businessServices)).append(")");
+
+            builder.append(" AND bs.businessService IN (").append(createQuery(businessServices)).append(")");
             addToPreparedStatement(preparedStmtList, businessServices);
         }
 
         List<String> stateUuids = criteria.getStateUuids();
         if (!CollectionUtils.isEmpty(stateUuids)) {
-        	addClauseIfRequired(preparedStmtList, builder);
-            builder.append(" st.uuid IN (").append(createQuery(stateUuids)).append(")");
+
+            builder.append(" AND st.uuid IN (").append(createQuery(stateUuids)).append(")");
             addToPreparedStatement(preparedStmtList, stateUuids);
         }
 
         List<String> actionUuids = criteria.getActionUuids();
         if (!CollectionUtils.isEmpty(actionUuids)) {
-        	addClauseIfRequired(preparedStmtList, builder);
-            builder.append(" ac.uuid IN (").append(createQuery(actionUuids)).append(")");
+
+            builder.append(" AND ac.uuid IN (").append(createQuery(actionUuids)).append(")");
             addToPreparedStatement(preparedStmtList, actionUuids);
         }
 
@@ -93,14 +93,6 @@ public class BusinessServiceQueryBuilder {
         ids.forEach(id -> {
             preparedStmtList.add(id);
         });
-    }
-    
-    private static void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
-        if (values.isEmpty())
-            queryString.append(" WHERE ");
-        else {
-            queryString.append(" AND");
-        }
     }
 
 
