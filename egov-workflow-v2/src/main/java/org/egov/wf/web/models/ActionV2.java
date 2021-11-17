@@ -34,7 +34,7 @@ import lombok.ToString;
 @Builder
 @ToString
 @EqualsAndHashCode(of = {"tenantId","currentState","action"})
-public class Action   {
+public class ActionV2   {
 
         @Size(max=256)
         @JsonProperty("uuid")
@@ -65,12 +65,12 @@ public class Action   {
         private List<String> roles;
 
         private AuditDetails auditDetails;
-        
+
         @JsonProperty("active")
         private Boolean active;
 
 
-        public Action addRolesItem(String rolesItem) {
+        public ActionV2 addRolesItem(String rolesItem) {
             if (this.roles == null) {
             this.roles = new ArrayList<>();
             }
@@ -79,4 +79,3 @@ public class Action   {
         }
 
 }
-
