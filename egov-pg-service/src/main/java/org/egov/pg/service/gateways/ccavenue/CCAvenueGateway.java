@@ -58,7 +58,8 @@ public class CCAvenueGateway implements Gateway {
     private final String ACCESS_CODE_KEY = "access_code";
     private final String ENCREQUEST_KEY = "encRequest";
     private final String BILLING_NAME_KEY = "billing_name";
-	private final String MERCHANT_PARAM1_KEY = "merchant_param1";	
+    private final String MERCHANT_PARAM1_KEY = "merchant_param1";	
+    private final String MERCHANT_PARAM2_KEY = "merchant_param2";		
 
     private RestTemplate restTemplate;
     private CCAvenueCryptUtil redirectCCavenueUtil;
@@ -101,7 +102,8 @@ public class CCAvenueGateway implements Gateway {
 			subAccountID = subAccountID.substring(0,20);
 		}
         encRequestMap.put(SUB_ACCOUNT_ID_KEY, subAccountID);
-		encRequestMap.put(MERCHANT_PARAM1_KEY, transaction.getConsumerCode().substring(0,2));		
+        encRequestMap.put(MERCHANT_PARAM1_KEY, transaction.getConsumerCode().substring(0,2));		
+	encRequestMap.put(MERCHANT_PARAM2_KEY, transaction.getConsumerCode());		
         encRequestMap.put(BILLING_NAME_KEY, BILLING_NAME);
         StringBuilder encRequest = new StringBuilder("");
 
