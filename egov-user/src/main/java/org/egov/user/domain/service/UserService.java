@@ -634,7 +634,11 @@ public class UserService {
     }
 
 	public User createMigrateUser(User user, RequestInfo requestInfo) {
-		user.setUuid(UUID.randomUUID().toString());
+		boolean onlyUserMigrate = true;
+		if(StringUtils.isEmpty(user.getUuid())) {
+			user.setUuid(UUID.randomUUID().toString());
+			onlyUserMigrate = false;
+		}
         conditionallyValidateOtp(user);
         /* encrypt here */
         user = encryptionDecryptionUtil.encryptObject(user, "User", User.class);
@@ -647,8 +651,18 @@ public class UserService {
         user.setPassword(encryptPwd(user.getPassword()));
         user.setDefaultPasswordExpiry(defaultPasswordExpiryInDays);
         user.setTenantId(getStateLevelTenantForCitizen(user.getTenantId(), user.getType()));
-        User persistedNewUser = persistNewUser(user);
+        User persistedNewUser;
+        if(onlyUserMigrate) {
+        	persistedNewUser = persistNewUserOnly(user);
+        } else {
+        	persistedNewUser = persistNewUser(user);
+        }
+        
         return encryptionDecryptionUtil.decryptObject(persistedNewUser, "User", User.class, requestInfo);
+	}
+
+	private User persistNewUserOnly(User user) {
+		return userRepository.createMigrateUser(user);
 	}
 
 
