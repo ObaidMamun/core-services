@@ -571,4 +571,26 @@ public class UserRepository {
         return tenantId.split("\\.")[0];
     }
 
+	public User createMigrateUser(User user) {
+		validateAndEnrichRoles(Collections.singletonList(user));
+        final Long newId = getNextSequence();
+        user.setId(newId);
+        //user.setUuid(UUID.randomUUID().toString());
+        user.setCreatedDate(new Date());
+        user.setLastModifiedDate(new Date());
+        user.setCreatedBy(user.getLoggedInUserId());
+        user.setLastModifiedBy(user.getLoggedInUserId());
+        final User savedUser = save(user);
+        if (user.getRoles().size() > 0) {
+            saveUserRoles(user);
+        }
+        final Address savedCorrespondenceAddress = saveAddress(user.getCorrespondenceAddress(), savedUser.getId(),
+                savedUser.getTenantId());
+        final Address savedPermanentAddress = saveAddress(user.getPermanentAddress(), savedUser.getId(),
+                savedUser.getTenantId());
+        savedUser.setPermanentAddress(savedPermanentAddress);
+        savedUser.setCorrespondenceAddress(savedCorrespondenceAddress);
+        return savedUser;
+	}
+
 }
