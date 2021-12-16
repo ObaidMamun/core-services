@@ -158,14 +158,28 @@ public class StorageController {
 			Map<String, String> maps= storageService.getUrls(tenantId, fileStoreIds);
 			
 		List<FileStoreResponse> responses = new ArrayList<>();
+		String localUrl;
 		for (Entry<String, String> entry : maps.entrySet()) {
 
-			responses.add(FileStoreResponse.builder().id(entry.getKey()).url(entry.getValue()).build());
+			localUrl = prepareLocalUrl(entry);
+			responses.add(FileStoreResponse.builder().id(entry.getKey()).url(entry.getValue()).localUrl(localUrl).build());
 		}
 		responseMap.putAll(maps);
 		responseMap.put("fileStoreIds", responses);
 		
 		return new ResponseEntity<>(responseMap, HttpStatus.OK);
 	}
+	
+	private String prepareLocalUrl(Entry<String, String> entry) {
+		String url = entry.getValue();
+		String fixedUrl = "http://egov-filestore:8080/filestore";
+		String dynamicUrl = "";
+		String[] urlArray = org.springframework.util.StringUtils.split(url, "/filestore");
+		if (urlArray != null) {
+			dynamicUrl = urlArray[1];
+		}
+		String localUrl = fixedUrl + dynamicUrl;
+		return localUrl;
+	}	
 	
 }
