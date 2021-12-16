@@ -14,4 +14,6 @@ public class FileStoreResponse {
 	private String id;
 	
 	private String url;
+	
+	private String localUrl;
 }
