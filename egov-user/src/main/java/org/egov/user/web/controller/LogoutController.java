@@ -30,22 +30,22 @@ public class LogoutController {
      */
     @PostMapping("/_logout")
     public ResponseInfo deleteToken(@RequestBody TokenWrapper tokenWrapper) throws Exception {
-    	log.info("Inside deleteToken with request data.");
+    	System.out.println("Inside deleteToken with request data.");
     	
     	long start = System.currentTimeMillis();
-    	log.info("Before tokenWrapper.getAccessToken() call.");
+    	System.out.println("Before tokenWrapper.getAccessToken() call.");
         String accessToken = tokenWrapper.getAccessToken();
-        log.info("After tokenWrapper.getAccessToken() call."+timeDiff(start));
+        System.out.println("After tokenWrapper.getAccessToken() call."+timeDiff(start));
         
         start = System.currentTimeMillis();
-        log.info("Before tokenStore.readAccessToken(accessToken) call.");
+        System.out.println("Before tokenStore.readAccessToken(accessToken) call.");
         OAuth2AccessToken redisToken = tokenStore.readAccessToken(accessToken);
-        log.info("After tokenStore.readAccessToken(accessToken) call."+timeDiff(start));
+        System.out.println("After tokenStore.readAccessToken(accessToken) call."+timeDiff(start));
         
         start = System.currentTimeMillis();
-        log.info("Before  tokenStore.removeAccessToken(redisToken) call.");
+        System.out.println("Before  tokenStore.removeAccessToken(redisToken) call.");
         tokenStore.removeAccessToken(redisToken);
-        log.info("Before  tokenStore.removeAccessToken(redisToken) call."+timeDiff(start));
+        System.out.println("Before  tokenStore.removeAccessToken(redisToken) call."+timeDiff(start));
         
         return new ResponseInfo("", "", new Date().toString(), "", "", "Logout successfully");
     }
